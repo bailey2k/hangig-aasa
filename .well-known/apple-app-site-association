@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "DZQZVVL36X.bailey2k.hangig",
+        "paths": [ "/invite/*" ]
+      }
+    ]
+  }
+}
