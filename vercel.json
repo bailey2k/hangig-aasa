@@ -1,14 +1,12 @@
 {
-  "headers": [
+  "routes": [
+    { "src": "/privacy", "dest": "/privacy.html" },
+    { "src": "/support", "dest": "/support.html" },
+    { "src": "/terms", "dest": "/terms.html"},
     {
-      "source": "/.well-known/apple-app-site-association",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        }
-      ]
+      "src": "/.well-known/apple-app-site-association",
+      "headers": { "Content-Type": "application/json" },
+      "dest": "/.well-known/apple-app-site-association"
     }
   ]
 }
-
