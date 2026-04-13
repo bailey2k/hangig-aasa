@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hangig - Plan trips with friends</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'DotoRounded';
+            src: url('fonts/DotoRounded-SemiBold.woff2') format('woff2'),
+                 url('fonts/DotoRounded-SemiBold.woff') format('woff'),
+                 url('fonts/DotoRounded-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DotoRounded', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Background gradient matching PS3BackgroundView */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0A1A2F 0%, #2A1B4F 50%, #000000 100%);
+        }
+
+        /* Radial gradient overlays */
+        .radial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .radial-overlay::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle, rgba(75, 63, 114, 0.25) 0%, transparent 70%);
+            filter: blur(40px);
+        }
+
+        .radial-overlay::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -10%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(59, 79, 125, 0.15) 0%, transparent 70%);
+            filter: blur(40px);
+        }
+
+        /* Particle canvas */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        /* Content container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Logo/Title */
+        .logo {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        /* Tagline */
+        .tagline {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 40px;
+            text-align: center;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        /* Description */
+        .description {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin-bottom: 50px;
+            text-align: center;
+            max-width: 600px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* CTA Buttons */
+        .cta-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'DotoRounded', 'Nunito', sans-serif;
+            text-decoration: none;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+
+        .cta-button.primary:hover {
+            background: linear-gradient(135deg, #7e8ff5 0%, #8e5bb2 100%);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            margin-bottom: 60px;
+            width: 100%;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding-top: 40px;
+            text-align: center;
+            opacity: 0.6;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            .cta-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cta-button {
+                justify-content: center;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading state for font */
+        .fonts-loading .logo,
+        .fonts-loading .tagline,
+        .fonts-loading .cta-button {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="fonts-loading">
+    <div class="background"></div>
+    <div class="radial-overlay"></div>
+    <canvas id="particles"></canvas>
+
+    <div class="container">
+        <h1 class="logo">hangig</h1>
+        <p class="tagline">plan trips with friends, made easy</p>
+        <p class="description">
+            Create trips, suggest activities, vote together, and make amazing memories. 
+            No more endless group chats trying to decide what to do.
+        </p>
+
+        <div class="cta-container">
+            <a href="https://apps.apple.com/app/hangig" class="cta-button primary">
+                <span>📱</span>
+                <span>Download on App Store</span>
+            </a>
+            <a href="#features" class="cta-button">
+                <span>✨</span>
+                <span>Learn More</span>
+            </a>
+        </div>
+
+        <div class="features" id="features">
+            <div class="feature">
+                <div class="feature-icon">🗺️</div>
+                <h3 class="feature-title">Easy Trip Planning</h3>
+                <p class="feature-description">Create a trip in seconds. Add your destination, dates, and you're ready to go.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">Collaborative Voting</h3>
+                <p class="feature-description">Everyone suggests activities and votes. The best ideas rise to the top.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">👥</div>
+                <h3 class="feature-title">Invite Friends</h3>
+                <p class="feature-description">Share a simple trip code and your friends can join instantly.</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="/support">Support</a>
+            </div>
+            <p class="copyright">© 2026 hangig. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Particle system matching PS3BackgroundView
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 80; // Matching birthRate * lifetime approximation
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8; // Horizontal velocity
+                this.vy = -0.6 - Math.random() * 0.4; // Upward velocity
+                this.life = 1.0;
+                this.maxLife = 6; // 6 second lifespan
+                this.size = 2 + Math.random() * 3; // Size range matching 0.2 scale
+                this.alpha = 0.6 + Math.random() * 0.4;
+            }
+
+            update(delta) {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Acceleration (gravity-like effect)
+                this.vy += 0.01; // Slight upward acceleration
+                
+                this.life -= delta / this.maxLife;
+                
+                if (this.life <= 0 || this.y < -10 || this.y > height + 10 || this.x < -10 || this.x > width + 10) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                const opacity = this.alpha * this.life;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        let lastTime = Date.now();
+
+        function animate() {
+            const now = Date.now();
+            const delta = (now - lastTime) / 1000;
+            lastTime = now;
+
+            ctx.clearRect(0, 0, width, height);
+
+            particles.forEach(particle => {
+                particle.update(delta);
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Remove fonts-loading class when fonts are ready
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                document.body.classList.remove('fonts-loading');
+            });
+        } else {
+            // Fallback for older browsers
+            setTimeout(() => {
+                document.body.classList.remove('fonts-loading');
+            }, 100);
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
